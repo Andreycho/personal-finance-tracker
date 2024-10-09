@@ -15,8 +15,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className="min-h-screen flex flex-col antialiased">
+    <html lang="en" suppressHydrationWarning>
+      <body className="min-h-screen flex flex-col antialiased bg-white dark:bg-slate-950">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -24,7 +24,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <NavBar />
-          {children}
+          <main className="flex flex-col flex-1 p-8">{children}</main>
         </ThemeProvider>
       </body>
     </html>

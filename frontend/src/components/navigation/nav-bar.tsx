@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export default function NavBar() {
   return (
-    <header className="sticky top-0 z-50">
+    <header className="sticky top-0 z-50 bg-white/95 dark:bg-slate-950/95">
       <div className="container px-8 flex h-14 max-w-screen-2xl items-center justify-between">
         <TypographyH4 className="font-bold">
           <Link href="/">Personal Finance Tracker</Link>
@@ -16,7 +16,7 @@ export default function NavBar() {
             Login
           </Link>
           <TypographySmall className="transition-colors">
-            <Link href="/login">Signup</Link>
+            <Link href="/signup">Signup</Link>
           </TypographySmall>
 
           <ModeToggle />
