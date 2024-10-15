@@ -83,7 +83,7 @@ export default function SignupForm() {
                 <FormItem>
                   <FormLabel>Username</FormLabel>
                   <FormControl>
-                    <Input placeholder="Max_R420" {...field} />
+                    <Input placeholder="max_robinson" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
