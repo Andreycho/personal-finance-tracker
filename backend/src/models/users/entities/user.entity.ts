@@ -1,6 +1,7 @@
+import { Transaction } from 'src/models/transactions/entities/transaction.entity';
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 
-@Entity('user')
+@Entity('users')
 export class UserEntity {
   @PrimaryGeneratedColumn('increment')
   id: number;
@@ -19,5 +20,8 @@ export class UserEntity {
 
   @Column({ default: null, type:"datetime"})
   updated_at?:  Date;
+
+  @OneToMany(() => Transaction, transaction => transaction.user)
+    transactions?: Transaction[];
   
 }

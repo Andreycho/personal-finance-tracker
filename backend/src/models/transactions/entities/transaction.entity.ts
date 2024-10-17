@@ -1,6 +1,8 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import e from 'express';
+import { UserEntity } from 'src/models/users/entities/user.entity';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 
-@Entity()
+@Entity('transactions')
 export class Transaction {
     @PrimaryGeneratedColumn()
     id: number;
@@ -20,9 +22,12 @@ export class Transaction {
     @Column()
     date: Date;
 
-    @Column({ default: null, type:"datetime" })
+    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     created_at?:  Date;
 
-    @Column({ default: null, type:"datetime" })
+    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
     updated_at?:  Date;
+
+    @ManyToOne(() => UserEntity, (user) => user.transactions, { eager: true })
+    user: UserEntity;
 }

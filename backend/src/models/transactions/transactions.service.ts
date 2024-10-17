@@ -2,6 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, UpdateResult } from 'typeorm';
 import { Transaction } from './entities/transaction.entity';
+import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { UserEntity } from '../users/entities/user.entity';
+import { BadRequestException } from '@nestjs/common';
 
 @Injectable()
 export class TransactionsService {
@@ -10,8 +13,20 @@ export class TransactionsService {
     private transactionsRepository: Repository<Transaction>,
   ) {}
 
-  async create(data: object)  {
-    return await this.transactionsRepository.save(data).then(res => res);
+  async create(data: CreateTransactionDto, user: any): Promise<Transaction> {
+    if (!user) {
+      throw new BadRequestException('User must be logged in to create a transaction.');
+    }
+
+    const transaction = new Transaction();
+    transaction.amount = data.amount;
+    transaction.transaction_type = data.transaction_type;
+    transaction.category = data.category;
+    transaction.description = data.description || null;
+    transaction.date = new Date(data.date);
+    transaction.user = user.payload.user;
+
+    return await this.transactionsRepository.save(transaction);
   }
 
   findAll(): Promise<Transaction[]> {

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Res, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Res, HttpStatus, Req } from '@nestjs/common';
 import { Response } from 'express';
 import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
@@ -11,8 +11,9 @@ export class TransactionsController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createTransactionDto: CreateTransactionDto) {
-    return this.transactionsService.create(createTransactionDto);
+  create(@Body() createTransactionDto: CreateTransactionDto, @Req() req) {
+    const user = req.user;
+    return this.transactionsService.create(createTransactionDto, user);
   }
 
   @Get()
