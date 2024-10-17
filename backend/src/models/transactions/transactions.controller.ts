@@ -1,12 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Res, HttpStatus } from '@nestjs/common';
+import { Response } from 'express';
 import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
+import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
 
 @Controller('transactions')
 export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
   create(@Body() createTransactionDto: CreateTransactionDto) {
     return this.transactionsService.create(createTransactionDto);
@@ -18,17 +21,24 @@ export class TransactionsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.transactionsService.findOne(+id);
+  async findOne(@Param('id') id: string, @Res() res: Response): Promise<Response> {
+    let transaction = await this.transactionsService.findOne(+id)
+    if(transaction) return res.status(HttpStatus.OK).json(transaction)
+    return res.status(HttpStatus.NOT_FOUND).json({"error" : "This resource  no longer exist or has been removed"})
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTransactionDto: UpdateTransactionDto) {
-    return this.transactionsService.update(+id, updateTransactionDto);
+  async update(@Param('id') id: string, @Body() updateTransactionDto: UpdateTransactionDto, @Res() res: Response) {
+    const response = await this.transactionsService.update(+id, updateTransactionDto);
+    if(response) return res.status(HttpStatus.OK).json({"message" : "Transaction updated successfully"})
+    return res.status(HttpStatus.NOT_FOUND).json({"error" : "This resource  no longer exist or has been removed"})
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.transactionsService.remove(+id);
+  async remove(@Param('id') id: string, @Res() res: Response) {
+    await this.transactionsService.remove(+id);
+    return res.status(HttpStatus.OK).json({"message" : "Transaction deleted successfully"});
   }
 }
