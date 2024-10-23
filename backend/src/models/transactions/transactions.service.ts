@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, UpdateResult } from 'typeorm';
 import { Transaction } from './entities/transaction.entity';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
-import { UserEntity } from '../users/entities/user.entity';
 import { BadRequestException } from '@nestjs/common';
+import { TransactionType } from './enums/transaction-type.enum';
 
 @Injectable()
 export class TransactionsService {
@@ -20,11 +20,11 @@ export class TransactionsService {
 
     const transaction = new Transaction();
     transaction.amount = data.amount;
-    transaction.transaction_type = data.transaction_type;
+    transaction.transaction_type = data.transaction_type as TransactionType;
     transaction.category = data.category;
     transaction.description = data.description || null;
     transaction.date = new Date(data.date);
-    transaction.user = user.payload.user;
+    transaction.user = user.payload.user.id;
 
     return await this.transactionsRepository.save(transaction);
   }

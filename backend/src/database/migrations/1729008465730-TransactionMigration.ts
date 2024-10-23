@@ -1,4 +1,5 @@
 import { MigrationInterface, QueryRunner, Table, TableForeignKey } from "typeorm";
+import { TransactionType } from "../../models/transactions/enums/transaction-type.enum";
 
 export class TransactionMigration1729008465730 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<void> {
@@ -28,7 +29,7 @@ export class TransactionMigration1729008465730 implements MigrationInterface {
                     {
                         name: 'transaction_type',
                         type: 'enum',
-                        enum: ['income', 'expense'],
+                        enum: Object.values(TransactionType),
                         isNullable: false,
                     },
                     {

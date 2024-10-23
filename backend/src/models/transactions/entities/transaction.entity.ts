@@ -1,6 +1,7 @@
 import e from 'express';
 import { UserEntity } from 'src/models/users/entities/user.entity';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { TransactionType } from '../enums/transaction-type.enum';
 
 @Entity('transactions')
 export class Transaction {
@@ -10,8 +11,8 @@ export class Transaction {
     @Column()
     amount: number;
 
-    @Column()
-    transaction_type: string;
+    @Column({ type: 'enum', enum: TransactionType })
+    transaction_type: TransactionType;
 
     @Column()
     category: string;
