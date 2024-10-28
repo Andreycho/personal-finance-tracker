@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { UsersService } from '../models/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -6,16 +6,6 @@ import * as bcrypt from 'bcrypt';
 @Injectable()
 export class AuthService {
     constructor(private usersService: UsersService, private jwtService: JwtService) {}
-
-    // async validateUser(email: string, pass: string): Promise<any> {
-    //   // const user = await this.usersService.findOne({"email":email});
-    //   // console.log(await bcrypt.hash(pass, 10));
-    //   // if (user && bcrypt.compare(user.password, await bcrypt.hash(pass, 10))) {
-    //   //   const { password, ...result } = user;
-    //   //   return result;
-    //   // }
-    //   // return null;
-    // }
 
     async validateUser(email: string, pass: string): Promise<any> {
       const user = await this.usersService.findOne({ email });
@@ -45,7 +35,15 @@ export class AuthService {
     }
 
     async register(data) {
-      console.log(data.password)
+      const existingUser = await this.usersService.findOne({ email: data.email });
+
+      if (existingUser) {
+        throw new HttpException(
+          { message: 'User already exists' },
+          HttpStatus.BAD_REQUEST
+        );
+      }
+
       data.password = await bcrypt.hash(data.password, 10)
       let response = await this.usersService.create(data);
       if (response) {
