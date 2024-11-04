@@ -18,7 +18,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
+import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -29,8 +31,7 @@ const passwordValidation = new RegExp(
 
 const signupFormSchema = z
   .object({
-    username: z.string().min(3).max(20),
-    fullname: z.string().min(3).max(50),
+    name: z.string().min(3).max(50),
     email: z.string().email(),
     password: z.string().min(8).regex(passwordValidation, {
       message:
@@ -45,24 +46,59 @@ const signupFormSchema = z
 
 type SignupFormProps = z.infer<typeof signupFormSchema>;
 
-// export const description =
-//   "A sign up form with email and password. There's an option to sign up with Google and a link to sign up if you don't have an account.";
+// const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default function SignupForm() {
   const form = useForm<SignupFormProps>({
     resolver: zodResolver(signupFormSchema),
     defaultValues: {
-      username: "",
-      fullname: "",
+      name: "",
       email: "",
       password: "",
       confirmPassword: "",
     },
   });
 
-  const onSubmit = (data: SignupFormProps) => {
-    console.log(data);
-  };
+  const { toast } = useToast();
+
+  async function onSubmit(formData: SignupFormProps) {
+    form.clearErrors();
+    // await sleep(2000);
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/register`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            name: formData.name,
+            email: formData.email,
+            password: formData.password,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.log("🚀 ~ onSubmit ~ errorData:", errorData);
+        throw new Error(
+          errorData.message ||
+            "There was a problem with your registration. Please try again."
+        );
+      }
+
+      //   const data = await response.json();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      //   console.log(error);
+      toast({
+        variant: "destructive",
+        title: "Something went wrong!",
+        description: error.message,
+      });
+      form.setError("root", error.message);
+    }
+  }
 
   return (
     <Card className="m-auto max-w-sm">
@@ -78,25 +114,16 @@ export default function SignupForm() {
           <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
             <FormField
               control={form.control}
-              name="username"
+              name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Username</FormLabel>
+                  <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="max_robinson" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="fullname"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Full name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Max Robinson" {...field} />
+                    <Input
+                      placeholder="Your Name"
+                      disabled={form.formState.isSubmitting}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -112,6 +139,7 @@ export default function SignupForm() {
                     <Input
                       type="email"
                       placeholder="m@example.com"
+                      disabled={form.formState.isSubmitting}
                       {...field}
                     />
                   </FormControl>
@@ -127,7 +155,10 @@ export default function SignupForm() {
                   <FormLabel>Password</FormLabel>
                   <FormControl>
                     {/* <Input type="password" {...field} /> */}
-                    <PasswordInput {...field} />
+                    <PasswordInput
+                      disabled={form.formState.isSubmitting}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -141,24 +172,47 @@ export default function SignupForm() {
                   <FormLabel>Confirm Password</FormLabel>
                   <FormControl>
                     {/* <Input type="password" {...field} /> */}
-                    <PasswordInput {...field} />
+                    <PasswordInput
+                      disabled={form.formState.isSubmitting}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit">Create an account</Button>
-            <Button variant="outline" className="w-full">
+            <Button type="submit" disabled={form.formState.isSubmitting}>
+              {form.formState.isSubmitting && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              Create an account
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full"
+              disabled={form.formState.isSubmitting}
+            >
               Sign up with Google
             </Button>
-            <Button variant="outline" className="w-full">
+            <Button
+              variant="outline"
+              className="w-full"
+              disabled={form.formState.isSubmitting}
+            >
               Sign up with Facebook
             </Button>
           </form>
         </Form>
         <div className="mt-4 text-center text-sm">
           Already have an account?{" "}
-          <Link href="/login" className="underline">
+          <Link
+            href="/login"
+            className={`underline ${
+              form.formState.isSubmitting ? "pointer-events-none" : ""
+            }`}
+            aria-disabled={form.formState.isSubmitting}
+            tabIndex={form.formState.isSubmitting ? -1 : undefined}
+          >
             Login
           </Link>
         </div>

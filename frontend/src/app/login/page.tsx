@@ -17,6 +17,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -41,9 +42,42 @@ export default function LoginForm() {
     },
   });
 
-  const onSubmit = (data: LoginFormProps) => {
-    console.log(data);
-  };
+  const { toast } = useToast();
+
+  async function onSubmit(formData: LoginFormProps) {
+    form.clearErrors();
+    // await sleep(2000);
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`,
+        {
+          method: "POST",
+          body: JSON.stringify(formData),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.log("🚀 ~ onSubmit ~ errorData:", errorData);
+        throw new Error(
+          errorData.message ||
+            "There was a problem with your login. Please try again."
+        );
+      }
+
+      //   const data = await response.json();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      //   console.log(error);
+      toast({
+        variant: "destructive",
+        title: "Something went wrong!",
+        description: error.message,
+      });
+      form.setError("root", error.message);
+    }
+  }
 
   return (
     <Card className="m-auto max-w-sm">

@@ -1,5 +1,6 @@
 import NavBar from "@/components/navigation/nav-bar";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/toaster";
 import type { Metadata } from "next";
 import "./globals.css";
 
@@ -23,6 +24,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <Toaster />
           <NavBar />
           <main className="flex flex-col flex-1 w-full p-4 md:p-8">
             {children}
