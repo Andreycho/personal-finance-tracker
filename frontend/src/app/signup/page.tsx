@@ -70,6 +70,7 @@ export default function SignupForm() {
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/register`,
         {
           method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             name: formData.name,
             email: formData.email,

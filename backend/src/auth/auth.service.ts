@@ -1,58 +1,64 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
-import { UsersService } from '../models/users/users.service';
-import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
+import { Injectable, HttpException, HttpStatus } from "@nestjs/common";
+import { UsersService } from "../models/users/users.service";
+import { JwtService } from "@nestjs/jwt";
+import * as bcrypt from "bcrypt";
+import { UserEntity } from "src/models/users/entities/user.entity";
 
 @Injectable()
 export class AuthService {
-    constructor(private usersService: UsersService, private jwtService: JwtService) {}
+  constructor(
+    private usersService: UsersService,
+    private jwtService: JwtService
+  ) {}
 
-    async validateUser(email: string, pass: string): Promise<any> {
-      const user = await this.usersService.findOne({ email });
-      
-      if (user && await bcrypt.compare(pass, user.password)) {
-        const { password, ...result } = user;
-        return result;
-      }
-      
-      return null;
+  async validateUser(email: string, pass: string): Promise<any> {
+    const user = await this.usersService.findOne(email);
+
+    if (user && (await bcrypt.compare(pass, user.password))) {
+      const { password, ...result } = user;
+      return result;
     }
 
-    async login(user: any) {
-      // console.log(user);
-      const payload = { 
-          user : {
-              id: user.id, 
-              email: user.email, 
-              name: user.name, 
-              created_at: user.created_at, 
-              updated_at: user.updated_at 
-          }
-      };
-      return {
-        access_token: this.jwtService.sign(payload),
-      };
+    return null;
+  }
+
+  async login(user: UserEntity) {
+    // console.log(user);
+    const payload = {
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        created_at: user.created_at,
+        updated_at: user.updated_at,
+      },
+    };
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
+  }
+
+  async register(data: Request) {
+    const existingUser = await this.usersService.findOne(data['email']);
+
+    if (existingUser) {
+      throw new HttpException(
+        { message: 'User already exists' },
+        HttpStatus.BAD_REQUEST
+      );
     }
 
-    async register(data) {
-      const existingUser = await this.usersService.findOne({ email: data.email });
+    console.log(data);
 
-      if (existingUser) {
-        throw new HttpException(
-          { message: 'User already exists' },
-          HttpStatus.BAD_REQUEST
-        );
-      }
-
-      data.password = await bcrypt.hash(data.password, 10)
-      let response = await this.usersService.create(data);
-      if (response) {
-          const { password, ...result } = response;
-          return result;
-      }
+    data['password'] = await bcrypt.hash(data['password'], 10);
+    let response = await this.usersService.create(data);
+    if (response) {
+      const { password, ...result } = response;
+      return result;
     }
+  }
 
-    decodeToken(token) : any {
-      return this.jwtService.decode(token)
-    }
+  decodeToken(token: string): any {
+    return this.jwtService.decode(token);
+  }
 }
