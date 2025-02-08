@@ -10,11 +10,11 @@ export class UsersService {
     private usersRepository: Repository<User>,
   ) {}
 
-  async findOne(data: number | any): Promise<User | undefined> {
+  async findOne(data: number | string): Promise<User | undefined> {
     if (typeof data === 'number') {
       return await this.usersRepository.findOne({ where: { id: data } });
     } else {
-      return await this.usersRepository.findOne({ where: data });
+      return await this.usersRepository.findOne({ where: { email: data} });
     }
   }
 

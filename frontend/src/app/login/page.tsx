@@ -55,6 +55,7 @@ export default function LoginForm() {
             "Content-Type": "application/json",
           },
           method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData),
         }
       );
