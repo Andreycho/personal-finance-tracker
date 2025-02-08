@@ -1,5 +1,5 @@
 import { Transaction } from 'src/models/transactions/entities/transaction.entity';
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, Unique } from 'typeorm';
 
 @Entity('users')
 export class UserEntity {
@@ -10,6 +10,7 @@ export class UserEntity {
   name: string;
 
   @Column()
+  @Unique(["email"])
   email: string;
 
   @Column()
