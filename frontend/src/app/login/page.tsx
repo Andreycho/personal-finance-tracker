@@ -46,12 +46,14 @@ export default function LoginForm() {
 
   async function onSubmit(formData: LoginFormProps) {
     form.clearErrors();
-    // await sleep(2000);
 
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`,
         {
+          headers: {
+            "Content-Type": "application/json",
+          },
           method: "POST",
           body: JSON.stringify(formData),
         }
@@ -59,17 +61,14 @@ export default function LoginForm() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.log("🚀 ~ onSubmit ~ errorData:", errorData);
         throw new Error(
           errorData.message ||
             "There was a problem with your login. Please try again."
         );
       }
 
-      //   const data = await response.json();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      //   console.log(error);
       toast({
         variant: "destructive",
         title: "Something went wrong!",

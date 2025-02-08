@@ -63,34 +63,32 @@ export default function SignupForm() {
 
   async function onSubmit(formData: SignupFormProps) {
     form.clearErrors();
-    // await sleep(2000);
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { confirmPassword, ...data } = formData;
 
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/register`,
         {
+          headers: {
+            "Content-Type": "application/json",
+          },
           method: "POST",
-          body: JSON.stringify({
-            name: formData.name,
-            email: formData.email,
-            password: formData.password,
-          }),
+          body: JSON.stringify(data),
         }
       );
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.log("🚀 ~ onSubmit ~ errorData:", errorData);
         throw new Error(
           errorData.message ||
             "There was a problem with your registration. Please try again."
         );
       }
 
-      //   const data = await response.json();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      //   console.log(error);
       toast({
         variant: "destructive",
         title: "Something went wrong!",
